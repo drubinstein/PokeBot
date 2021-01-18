@@ -1,8 +1,13 @@
 local bridge = {}
 
-local utils = require("util.utils")
-local socket = require("socket")
-local memory = require "util.memory"
+-- local utils = require("util.utils")
+-- local socket = require("socket")
+-- local memory = require "util.memory"
+
+local lunajson = require("lunajson")
+
+local lua_out = assert(io.open("../lua_out", "wb"))
+local lua_in = assert(io.open("../lua_in", "rb"))
 
 local client = nil
 local timeStopped = false
@@ -11,6 +16,7 @@ local lastMins = 0
 local lastHours = 0
 local frames = 0
 
+--[[
 local function send(prefix, body)
     if (client) then
         local message = prefix
@@ -18,6 +24,15 @@ local function send(prefix, body)
         client:send(message .. '\n')
         return true
     end
+end
+--]]
+
+function bridge.send(msg)
+    lua_out:write(msg .. "\n")
+    lua_out:flush()
+    local response = lua_in:read()
+    local decoded = lunajson.decode(response)
+    return decoded
 end
 
 local function readln()
@@ -35,7 +50,7 @@ end
 
 function bridge.init()
     -- print("Bridge initializing")
-    client = socket.connect("localhost", 16834)
+    -- client = socket.connect("localhost", 16834)
     -- print("Bridge initialized")
 end
 
@@ -61,11 +76,14 @@ function bridge.chat(message, extra)
     return true
 end
 
-function bridge.time()
+function bridge.time(time_data)
     if (not timeStopped) then
-        local seconds = memory.raw(0x1A44)
-        local minutes = memory.raw(0x1A43)
-        local hours = memory.raw(0x1A41)
+        -- local seconds = memory.raw(0x1A44)
+        -- local minutes = memory.raw(0x1A43)
+        -- local hours = memory.raw(0x1A41)
+        local seconds = time_data["seconds"]
+        local minutes = time_data["minutes"]
+        local hours = time_data["hours"]
 
         if (hours ~= lastHours or minutes ~= lastMinutes or seconds ~=
             lastSeconds) then
@@ -79,7 +97,7 @@ function bridge.time()
         if (seconds < 10) then seconds = "0" .. seconds end
         if (minutes < 10) then minutes = "0" .. minutes end
         local message = hours .. ":" .. minutes .. ":" .. seconds
-        send("setgametime", message)
+        -- send("setgametime", message)
         frames = frames + 1
     end
 end
@@ -92,12 +110,14 @@ end
 
 function bridge.command(command)
     -- print("Bridge Command")
-    return send(command)
+    -- return send(command)
+    return true
 end
 
 function bridge.comparisonTime()
     -- print("Bridge Comparison Time")
-    return send("getcomparisonsplittime")
+    -- return send("getcomparisonsplittime")
+    return true
 end
 
 function bridge.process()
@@ -128,8 +148,8 @@ end
 
 function bridge.liveSplit()
     -- print("Bridge Start Timer")
-    send("pausegametime")
-    send("starttimer")
+    -- send("pausegametime")
+    -- send("starttimer")
     timeStopped = false
 end
 
@@ -139,7 +159,7 @@ function bridge.split(encounters, finished)
         -- database.split(utils.igt(), encounters)
     end
     if (finished) then timeStopped = true end
-    send("split")
+    -- send("split")
 end
 
 function bridge.encounter()
@@ -148,7 +168,7 @@ end
 
 function bridge.reset()
     -- print("Bridge Reset")
-    send("reset")
+    -- send("reset")
     timeStopped = false
 end
 
@@ -159,6 +179,8 @@ function bridge.close()
         client = nil
     end
     -- print("Bridge closed")
+    lua_in:close()
+    lua_out:close()
 end
 
 return bridge

@@ -132,4 +132,14 @@ function memory.value(section, key)
     return raw(memoryAddress)
 end
 
+-- From bridge.time
+function memory.time()
+    local seconds = raw(0x1A44)
+    local minutes = raw(0x1A43)
+    local hours = raw(0x1A41)
+
+    return {["seconds"] = seconds, ["minutes"] = minutes, ["hours"] = hours}
+
+end
+
 return memory
