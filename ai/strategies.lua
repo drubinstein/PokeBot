@@ -19,6 +19,8 @@ local utils = require "util.utils"
 local inventory = require "storage.inventory"
 local pokemon = require "storage.pokemon"
 
+local lunajson = require "lunajson"
+
 local tries = 0
 local tempDir, canProgress, initialized
 local areaName
@@ -101,8 +103,9 @@ local function hardReset(message, extra)
 	if (strategies.seed) then
 		message = message.." | "..strategies.seed
 	end
-	bridge.chat(message)
-	client.reboot_core()
+	-- bridge.chat(message)
+	-- client.reboot_core()
+	bridge.send(lunajson.encode({["method"] = "reset"}))
 	return true
 end
 
