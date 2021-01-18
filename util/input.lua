@@ -75,9 +75,10 @@ function input.cancel(accept)
 end
 
 function input.escape()
-    local inputTable = {Right = true, Down = true}
+    -- local inputTable = {Right = true, Down = true}
     -- joypad.set(inputTable)
     bridge.send(lunajson.encode({["method"] = "button", ["payload"] = "right"}))
+    bridge.send(lunajson.encode({["method"] = "frame_advance"}))
     bridge.send(lunajson.encode({["method"] = "button", ["payload"] = "down"}))
     bridgeButton("Escape")
 end
