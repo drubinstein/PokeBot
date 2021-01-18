@@ -101,7 +101,7 @@ end
 local function raw(value)
     local json_msg = lunajson.encode({
         ["method"] = "memory",
-        ["payload"] = value + 0x0000 -- the RAM space
+        ["payload"] = value + 0xC000 -- the RAM space
     })
     local mem_resp = bridge.send(json_msg)
     return mem_resp["memory"]

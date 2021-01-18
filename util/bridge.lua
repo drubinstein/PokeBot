@@ -31,6 +31,7 @@ function bridge.send(msg)
     lua_out:write(msg .. "\n")
     lua_out:flush()
     local response = lua_in:read()
+    -- print("Sent to Python " .. msg .. " Received from Python " .. response)
     local decoded = lunajson.decode(response)
     return decoded
 end
